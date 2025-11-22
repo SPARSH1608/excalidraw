@@ -12,6 +12,7 @@
     "@repo/config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
     "@repo/types": "workspace:*",
+    "@repo/db": "workspace:*",
     "@types/express": "^5.0.5",
     "@types/jsonwebtoken": "^9.0.10",
     "express": "^5.1.0",

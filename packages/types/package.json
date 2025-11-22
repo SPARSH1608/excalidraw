@@ -7,7 +7,6 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "@repo/types": "workspace:*",
     "@repo/typescript-config": "workspace:*",
     "zod": "^4.1.12"
   },
@@ -17,5 +16,5 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs"
+  "type": "module"
 }

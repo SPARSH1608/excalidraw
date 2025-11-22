@@ -4,18 +4,35 @@ import JWT_SECRET  from '@repo/config/secrets';
 import jwt from 'jsonwebtoken';
 import { middleware } from './middleware';
 import { createUserSchema,createRoomScheama,loginUserSchema } from '@repo/types/types';
+import { prisma} from '@repo/db/client';
 app.get('/', (req, res) => {
   res.send('Hello, World!');
 });
 
-app.post('/signin', (req, res) => {
-  const {username, email, password} = req.body;
-  const userParse = createUserSchema.safeParse({username, email, password});
-  if(!userParse.success){
+app.post('/signin', async(req, res) => {
+  try {
+    
+    const {username, email, password} = req.body;
+    const userParse = createUserSchema.safeParse({username, email, password});
+    if(!userParse.success){
     return res.status(400).json({error:"Invalid user data"});
   }
   //db
-  res.json({ userId:"123"})
+  const user =await prisma.user.create({
+    data:{
+      name: userParse.data.username,
+      email: userParse.data.email,
+      password: userParse.data.password,
+      rooms: { create: [] },
+      chats: { create: [] }
+    }
+  })
+  console.log('User created:', user);
+  res.json({ userId: user.id });
+} catch (error) {
+  console.error('Error creating user:', error);
+  res.status(500).json({ error: 'Internal server error' });  
+}
 })
 app.post('/signup', (req, res) => {
   const {email, password} = req.body;
