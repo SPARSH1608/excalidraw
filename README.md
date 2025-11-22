@@ -1,135 +1,38 @@
-# Turborepo starter
 
-This Turborepo starter is maintained by the Turborepo core team.
 
-## Using this example
+## Progress — Setup steps (summary)
 
-Run the following command:
+The following lists the steps provided and the current status (up to now) based on the repository contents.
 
-```sh
-npx create-turbo@latest
-```
+1. Initialized an empty turborepo
+	- Status: Done — `turbo.json` and workspace layout present.
+2. Deleted the docs app
+	- Status: Done — `apps/docs` is not present in this workspace.
+3. Added http-server, ws-server
+	- Status: Done — `apps/http-backend` and `apps/ws-backend` exist.
+4. Added `package.json` in both places
+	- Status: Done — see `apps/http-backend/package.json` and `apps/ws-backend/package.json`.
+5. Added `tsconfig.json` in both the places, and imported it from `@repo/typescript-config/base.json`
+	- Status: Done — `packages/typescript-config` is present and apps reference workspace configs.
+6. Added `@repo/typescript-config` as a dependency in both ws-server and http-server
+	- Status: Done — `apps/http-backend/package.json` lists `@repo/typescript-config` as `workspace:*`.
+7. Added `build`, `dev` and `start` scripts to both the projects
+	- Status: Present — see `scripts` in each app's `package.json`.
+8. Update the turbo-config in both the projects (optional)
+	- Status: Optional — local `turbo.json` is present; filtering/scripts can be adjusted as needed.
+9. Initialize a http server, Initialize a websocket server
+	- Status: HTTP server implemented (`apps/http-backend/src/index.ts`). WebSocket server scaffold exists at `apps/ws-backend` (verify/extend as needed).
 
-## What's inside?
+10. Create an express server, add signup, signin, create-room
+	 - Status: Done — `apps/http-backend/src/index.ts` implements routes: `/`, `/signin`, `/signup`, `/room`.
+11. Create middleware, gate the create-room point
+	 - Status: Done — `apps/http-backend/src/middleware.ts` verifies JWT and attaches `userId`.
+12. Gate the websocket server using the token
+	 - Status: Partial — websocket gating planned; HTTP auth/middleware is implemented and can be reused for WS.
 
-This Turborepo includes the following packages/apps:
-
-### Apps and Packages
-
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
-
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
-
-### Utilities
-
-This Turborepo has some additional tools already setup for you:
-
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
-
-### Build
-
-To build all apps and packages, run the following command:
-
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build
-yarn dlx turbo build
-pnpm exec turbo build
-```
-
-You can build a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
-
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build --filter=docs
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build --filter=docs
-yarn exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
-```
-
-### Develop
-
-To develop all apps and packages, run the following command:
-
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev
-yarn exec turbo dev
-pnpm exec turbo dev
-```
-
-You can develop a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
-
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev --filter=web
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev --filter=web
-yarn exec turbo dev --filter=web
-pnpm exec turbo dev --filter=web
-```
-
-### Remote Caching
-
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
-
-Turborepo can use a technique known as [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo login
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo login
-yarn exec turbo login
-pnpm exec turbo login
-```
-
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
-
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
-
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo link
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo link
-yarn exec turbo link
-pnpm exec turbo link
-```
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turborepo.com/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.com/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.com/docs/reference/configuration)
-- [CLI Usage](https://turborepo.com/docs/reference/command-line-reference)
+13. Create a db package
+	 - Status: Created (in progress) — `packages/db` exists, implementation needs completion.
+14. Using the db package in the http layer
+	 - Status: Planned/partial — HTTP endpoints have DB TODOs; wire `packages/db` into `apps/http-backend` next.
+15. Add a common package where we add the zod schema and the JWT_SECRET
+	 - Status: Done — zod schemas in `packages/types/src/index.ts`; JWT_SECRET in `packages/config/src/index.ts`.

@@ -10,6 +10,9 @@
     "@repo/typescript-config": "workspace:*",
     "prisma": "^7.0.0"
   },
+  "exports":{
+    "./client":"./src/index.ts"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
