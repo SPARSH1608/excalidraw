@@ -4,7 +4,7 @@ import JWT_SECRET  from '@repo/config/secrets';
 import jwt from 'jsonwebtoken';
 import { middleware } from './middleware.js';
 import { createUserSchema,createRoomScheama,loginUserSchema } from '@repo/types/types';
-import { prisma} from '@repo/db/client';
+import { prisma} from "@repo/db/client"
 app.get('/', (req, res) => {
   res.send('Hello, World!');
 });
