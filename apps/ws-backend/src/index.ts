@@ -3,9 +3,10 @@ const wss=new WebSocketServer({port:8080});
 import JWT_SECRET from "@repo/config/secrets";
 import jwt ,{JwtPayload} from "jsonwebtoken";
 import { chatState } from "./ChatState";
-type WebSocketUser=WebSocket & {
-    userId:string
-}
+// type WebSocketUser=WebSocket & {
+//     userId:string
+// }
+
 interface Data{
     type:string
     roomId:string
@@ -47,23 +48,23 @@ wss.on('connection',(ws,request)=>{
     ws.close()
     return
    }
-   chatState.registerConnection(userId,ws as WebSocketUser);
+   chatState.registerConnection(userId,ws as any );
     console.log('New client connected');
     ws.on('message', (data) => {
         const payload = JSON.parse(data.toString()) as Data;
         console.log(`Received message: ${data}`);
         if (payload.type === "JOIN_ROOM") {
-            chatState.joinRoom((ws as WebSocketUser).userId!, payload.roomId);
+            chatState.joinRoom((ws as any).userId!, payload.roomId);
         }
         if (payload.type === 'CHAT') {
             chatState.broadcast(payload.roomId, payload);
         }
         if (payload.type === 'LEAVE_ROOM') {
-            chatState.unregisterConneection(ws as WebSocketUser);
+            chatState.unregisterConnection(ws as any );
         }
     });
     ws.on('close',()=>{
-        chatState.unregisterConneection(ws as WebSocketUser)
+        chatState.unregisterConnection(ws as any )
         console.log('Client disconnected');
     });
 })
