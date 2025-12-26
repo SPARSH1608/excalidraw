@@ -225,9 +225,9 @@ export class CanvasEngine {
       this.pencilPoints.push({ x, y });
   
       this.ctx.beginPath();
-      this.ctx.moveTo(this.pencilPoints[0].x, this.pencilPoints[0].y);
+      this.ctx.moveTo(this.pencilPoints[0]?.x!, this.pencilPoints[0]?.y!);
       for (let i = 1; i < this.pencilPoints.length; i++) {
-        this.ctx.lineTo(this.pencilPoints[i].x, this.pencilPoints[i].y);
+        this.ctx.lineTo(this.pencilPoints[i]?.x!, this.pencilPoints[i]?.y!);
       }
       this.ctx.stroke();
       return;
