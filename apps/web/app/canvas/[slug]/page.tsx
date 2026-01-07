@@ -1,53 +1,38 @@
-'use client'
 
-import { useEffect, useRef, useState } from "react"
-import { CanvasEngine } from "../../engine/CanvasEngine"
+'use client'
+import { useEffect, useRef } from "react"
+import { CanvasRenderer } from "../../engine/CanvasEngine";
+import { shapeStore } from "../../engine/ShapeStore";
 
 export default function Canvas() {
     const canvasRef = useRef<HTMLCanvasElement>(null)
-    const [type, setType] = useState("")
-    const engineRef = useRef<CanvasEngine | null>(null)
+    const engineRef = useRef<CanvasRenderer | null>(null);
     useEffect(() => {
-        if(!canvasRef.current) return
-        engineRef.current = new CanvasEngine(canvasRef.current)
-        engineRef.current.setTool(type)
-    
+        if (!canvasRef.current) return;
+        console.log('ref', canvasRef)
+        console.log('current', canvasRef.current)
+        engineRef.current = new CanvasRenderer(canvasRef.current)
+
+
     }, [])
-    
-    useEffect(() => {
-        if (engineRef.current) {
-            engineRef.current.setTool(type)
-        }
-    }, [type])
-    return (<div>
+    return ((
         <div>
-            {
-                type
-            }
-            <button
-            onClick={()=>setType('text')}
-            >Text</button>
-             <button
-            onClick={()=>setType('select')}
-            >Select</button>
-            <button
-                onClick={() => setType('rect')}
-            >Rectangle</button>
-            <button
-                onClick={() => setType('circle')}
+            <canvas
+                ref={canvasRef}
+                width={800}
+                height={800}
+                style={{ background: "#1e1e1e" }}
+            />
+            <button onClick={() => engineRef.current?.setTool("select")}>
+                Select
+            </button>
 
-            >Circle</button>
-            <button
-                onClick={() => setType('line')}
+            <button onClick={() => engineRef.current?.setTool("rect")}>
+                Rectangle
+            </button>
 
-            >Line</button>
-            <button
-                onClick={() => setType('pencil')}
-
-            >Pencil</button>
 
         </div>
-     
-        <canvas ref={canvasRef} height={1000} width={1000}></canvas>
-    </div>)
+    )
+    )
 }

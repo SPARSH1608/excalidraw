@@ -137,7 +137,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "/home/sparsh/Desktop/excalidraw/packages/db/generated/prisma",
+      "value": "/Users/sparsh/Desktop/learning/excalidraw/packages/db/generated/prisma",
       "fromEnvVar": null
     },
     "config": {
@@ -146,17 +146,16 @@ const config = {
     "binaryTargets": [
       {
         "fromEnvVar": null,
-        "value": "debian-openssl-3.0.x",
+        "value": "darwin",
         "native": true
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "/home/sparsh/Desktop/excalidraw/packages/db/prisma/schema.prisma",
+    "sourceFilePath": "/Users/sparsh/Desktop/learning/excalidraw/packages/db/prisma/schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
-    "rootEnvPath": null,
-    "schemaEnvPath": "../../.env"
+    "rootEnvPath": null
   },
   "relativePath": "../../prisma",
   "clientVersion": "6.3.1",
