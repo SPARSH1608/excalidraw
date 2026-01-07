@@ -1,6 +1,12 @@
 import { RectShape } from "./Shapes";
 import { shapeStore } from "./ShapeStore";
-
+type ResizeHandle = "nw" | "n" | "ne"| "w"| "e"| "sw" | "s" | "se"
+type selectionBox={
+    x:number,
+    y:number,
+    width:number,
+    height:number
+}
 export class CanvasRenderer {
     private canvas: HTMLCanvasElement;
     private ctx: CanvasRenderingContext2D;
@@ -10,6 +16,18 @@ export class CanvasRenderer {
     //for draggin
     private lastX = 0;
     private lastY = 0;
+    //for resizing
+
+
+    private resizing:
+    | {
+        handle: ResizeHandle;
+        startBox: selectionBox;
+        startRects: RectShape[];
+        startMouse: { x: number; y: number };
+      }
+    | null = null;
+  
     private tool: "rect" | "select" = "rect";
     private selectedIds = new Set<string>()
     private selectionBox: { x: number; y: number; width: number; height: number } | null = null
@@ -49,27 +67,18 @@ export class CanvasRenderer {
 
     render() {
         this.clear();
-
+      
         const shapes = shapeStore.getAllShapes();
         for (const shape of shapes) {
-            if (shape.type == "rect") {
-                this.drawRect(shape)
-            }
-            if (this.selectedIds.has(shape.id)) {
-                this.ctx.setLineDash([4, 4]);
-                this.ctx.strokeStyle = "cyan";
-                this.ctx.strokeRect(
-                    shape.x - 4,
-                    shape.y - 4,
-                    shape.width + 8,
-                    shape.height + 8
-                );
-                this.ctx.setLineDash([]);
-            }
-
+          if (shape.type === "rect") {
+            this.drawRect(shape);
+          }
         }
-
-    }
+      
+        this.drawSelectionBoundingBox();
+        this.drawResizeHandles(); 
+      }
+      
     //function which can handle neg drags -> positive drags
     private normalizeRect(r: { x: number, y: number; width: number; height: number }) {
         const x = Math.min(r.x, r.x + r.width);
@@ -78,6 +87,42 @@ export class CanvasRenderer {
         const height = Math.abs(r.height)
         return { x, y, width, height }
     }
+ 
+    private getResizeHandleAt(x: number, y: number): ResizeHandle | null {
+        const box = this.getSelectionBoundingBox();
+        if (!box) return null;
+      
+        const size = 8;
+        const half = size / 2;
+      
+        const handles: { id: ResizeHandle; x: number; y: number }[] = [
+          { id: "nw", x: box.x - half, y: box.y - half },
+          { id: "n",  x: box.x + box.width / 2 - half, y: box.y - half },
+          { id: "ne", x: box.x + box.width - half, y: box.y - half },
+      
+          { id: "w",  x: box.x - half, y: box.y + box.height / 2 - half },
+          { id: "e",  x: box.x + box.width - half, y: box.y + box.height / 2 - half },
+      
+          { id: "sw", x: box.x - half, y: box.y + box.height - half },
+          { id: "s",  x: box.x + box.width / 2 - half, y: box.y + box.height - half },
+          { id: "se", x: box.x + box.width - half, y: box.y + box.height - half },
+        ];
+      
+        for (const h of handles) {
+          if (
+            x >= h.x &&
+            x <= h.x + size &&
+            y >= h.y &&
+            y <= h.y + size
+          ) {
+            return h.id;
+          }
+        }
+      
+        return null;
+      }
+      
+      
     private rectsIntersect(
         a: { x: number; y: number; width: number; height: number },
         b: { x: number; y: number; width: number; height: number }
@@ -89,14 +134,84 @@ export class CanvasRenderer {
             a.y > b.y + b.height
         );
     }
-    private getBoundingBox(shape: RectShape) {
+    private drawSelectionBoundingBox() {
+        const box = this.getSelectionBoundingBox();
+        if (!box) return;
+      
+        this.ctx.setLineDash([6, 4]);
+        this.ctx.strokeStyle = "cyan";
+        this.ctx.lineWidth = 1;
+      
+        this.ctx.strokeRect(
+          box.x,
+          box.y,
+          box.width,
+          box.height
+        );
+      
+        this.ctx.setLineDash([]);
+      }
+      
+      private drawResizeHandles() {
+        const box = this.getSelectionBoundingBox();
+        if (!box) return;
+      
+        const handles = this.getResizeHandles(box);
+      
+        this.ctx.fillStyle = "white";
+        this.ctx.strokeStyle = "black";
+      
+        for (const h of handles) {
+          this.ctx.fillRect(h.x, h.y, 8, 8);
+          this.ctx.strokeRect(h.x, h.y, 8, 8);
+        }
+      }
+      
+      private getSelectionBoundingBox() {
+        if (this.selectedIds.size === 0) return null;
+      
+        const shapes = shapeStore.getAllShapes()
+          .filter(s => this.selectedIds.has(s.id));
+      
+        if (shapes.length === 0) return null;
+      
+        let minX = Infinity;
+        let minY = Infinity;
+        let maxX = -Infinity;
+        let maxY = -Infinity;
+      
+        for (const shape of shapes) {
+            const box = this.getBoundingBox(shape);
+
+            minX = Math.min(minX, box.x);
+            minY = Math.min(minY, box.y);
+            maxX = Math.max(maxX, box.x + box.width);
+            maxY = Math.max(maxY, box.y + box.height);
+            
+        }
+      
         return {
-            x: shape.x,
-            y: shape.y,
-            width: shape.width,
-            height: shape.height
+          x: minX,
+          y: minY,
+          width: maxX - minX,
+          height: maxY - minY
         };
-    }
+      }
+      
+      private getBoundingBox(shape: RectShape) {
+        const x1 = Math.min(shape.x, shape.x + shape.width);
+        const y1 = Math.min(shape.y, shape.y + shape.height);
+        const x2 = Math.max(shape.x, shape.x + shape.width);
+        const y2 = Math.max(shape.y, shape.y + shape.height);
+      
+        return {
+          x: x1,
+          y: y1,
+          width: x2 - x1,
+          height: y2 - y1
+        };
+      }
+      
     private moveRect(shape: RectShape, dx: number, dy: number) {
         shape.x += dx;
         shape.y += dy;
@@ -111,7 +226,11 @@ export class CanvasRenderer {
     private onMouseUp = (e: MouseEvent) => {
         if (!this.isDrawing) return;
         this.isDrawing = false;
-
+        if (this.resizing) {
+            this.resizing = null;
+            return;
+          }
+          
         const { x, y } = this.getMousePos(e);
 
         if (this.tool === "select" && this.selectionBox) {
@@ -157,13 +276,64 @@ export class CanvasRenderer {
         this.ctx.strokeRect(r.x, r.y, r.width, r.height);
         this.ctx.setLineDash([]);
     }
+    private getResizeHandles(box: {
+        x: number;
+        y: number;
+        width: number;
+        height: number;
+      }) {
+        const size = 8;
+        const half = size / 2;
+      
+        const x = box.x;
+        const y = box.y;
+        const w = box.width;
+        const h = box.height;
+      
+        return [
+          { x: x - half,       y: y - half },         // TL
+          { x: x + w - half,   y: y - half },         // TR
+          { x: x - half,       y: y + h - half },     // BL
+          { x: x + w - half,   y: y + h - half },     // BR
+      
+          { x: x + w / 2 - half, y: y - half },       // TM
+          { x: x + w / 2 - half, y: y + h - half },   // BM
+          { x: x - half,         y: y + h / 2 - half }, // ML
+          { x: x + w - half,     y: y + h / 2 - half }, // MR
+        ];
+      }
+      
 
     private hitTestRect(shape: RectShape, x: number, y: number): boolean {
         return (x >= shape.x && x <= shape.x + shape.width && y >= shape.y && y <= shape.y + shape.height)
     }
+ 
+      
     private onMouseDown = (e: MouseEvent) => {
         const { x, y } = this.getMousePos(e);
-
+        if (this.tool === "select") {
+            const handle = this.getResizeHandleAt(x, y);
+          
+            if (handle) {
+              const box = this.getSelectionBoundingBox()!;
+              const shapes = shapeStore
+                .getAllShapes()
+                .filter(s => this.selectedIds.has(s.id))
+                .map(s => ({ ...s }));
+          
+              this.resizing = {
+                handle,
+                startBox: { ...box },
+                startRects: shapes,
+                startMouse: { x, y },
+              };
+          
+              this.isDrawing = true;
+              return;
+            }
+          }
+          
+        
         if (this.tool == 'select') {
             const shapes=shapeStore.getAllShapes();
             let hitSelected=false;
@@ -193,10 +363,62 @@ export class CanvasRenderer {
         this.startY = y
         console.log("DOWN", x, y);
     }
+    private performResize(e: MouseEvent) {
+        if (!this.resizing) return;
+      
+        const { x, y } = this.getMousePos(e);
+        const { handle, startBox, startRects, startMouse } = this.resizing;
+      
+        let newBox = { ...startBox };
+      
+        const dx = x - startMouse.x;
+        const dy = y - startMouse.y;
+      
+        if (handle.includes("e")) newBox.width += dx;
+        if (handle.includes("s")) newBox.height += dy;
+      
+        if (handle.includes("w")) {
+          newBox.x += dx;
+          newBox.width -= dx;
+        }
+      
+        if (handle.includes("n")) {
+          newBox.y += dy;
+          newBox.height -= dy;
+        }
+      
+        // Prevent inversion
+        if (newBox.width <= 1 || newBox.height <= 1) return;
+      
+        const scaleX = newBox.width / startBox.width;
+        const scaleY = newBox.height / startBox.height;
+      
+        const shapes = shapeStore.getAllShapes();
+      
+        for (const start of startRects) {
+          const shape = shapes.find(s => s.id === start.id)!;
+      
+          const relX = start.x - startBox.x;
+          const relY = start.y - startBox.y;
+      
+          shape.x = newBox.x + relX * scaleX;
+          shape.y = newBox.y + relY * scaleY;
+          shape.width = start.width * scaleX;
+          shape.height = start.height * scaleY;
+        }
+      }
+      
+      
     private onMouseMove = (e: MouseEvent) => {
-        if (!this.isDrawing) return;
+        if (!this.isDrawing && !this.resizing) return;
         const { x, y } = this.getMousePos(e);
         console.log("MOVE", x, y);
+        if (this.resizing) {
+            this.performResize(e);
+            this.render();
+            return;
+          }
+          
         if (this.tool === "select" && this.selectionBox) {
             this.selectionBox.width = x - this.startX;
             this.selectionBox.height = y - this.startY;
