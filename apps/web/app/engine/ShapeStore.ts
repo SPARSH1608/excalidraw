@@ -12,6 +12,9 @@ class ShapeStore{
     getAllShapes():Shape[]{
         return this.shapes
     }
+    deleteByIds(ids:Set<string>){
+        this.shapes=this.shapes.filter(s=>!ids.has(s.id))
+    }
     clear(){
         this.shapes=[]
     }
