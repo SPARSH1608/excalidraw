@@ -551,16 +551,51 @@ private draftShape:RectShape|null=null
   }
   private setStrokeStyle(color = "white") {
     this.ctx.strokeStyle = color;
+    
     this.ctx.lineWidth = 1 / this.camera.zoom;
+  }
+  private drawRoundedRect(
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    radius = 6
+  ) {
+    const ctx = this.ctx;
+  
+    const r = Math.min(radius, Math.abs(width) / 2, Math.abs(height) / 2);
+  
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + width - r, y);
+    ctx.quadraticCurveTo(x + width, y, x + width, y + r);
+  
+    ctx.lineTo(x + width, y + height - r);
+    ctx.quadraticCurveTo(x + width, y + height, x + width - r, y + height);
+  
+    ctx.lineTo(x + r, y + height);
+    ctx.quadraticCurveTo(x, y + height, x, y + height - r);
+  
+    ctx.lineTo(x, y + r);
+    ctx.quadraticCurveTo(x, y, x + r, y);
+  
+    ctx.closePath();
+    ctx.stroke();
   }
   
   private drawRect(shape: RectShape) {
-    this.setStrokeStyle("white")
-    this.ctx.strokeRect(
-      shape.x,
-      shape.y,
-      shape.width,
-      shape.height
-    )
+    this.ctx.strokeStyle = "#ECECF1";
+    this.ctx.lineWidth = 2/this.camera.zoom;
+    this.ctx.lineJoin = "round";
+    this.ctx.lineCap = "round";
+   const {x,y,width,height}=this.normalizeRect({x:shape.x,y:shape.y,width:shape.width,height:shape.height});
+    this.drawRoundedRect(
+      x,
+      y,
+     width,
+      height,
+      6
+    );
   }
+  
 }
