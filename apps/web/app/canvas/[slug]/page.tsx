@@ -9,17 +9,26 @@ export default function CanvasPage() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const engineRef = useRef<CanvasRenderer | null>(null)
   const [tool, setTool] = useState<Tool>("select")
-
+const [zoom,setZoom]=useState(100);
   useEffect(() => {
     if (!canvasRef.current) return
     engineRef.current = new CanvasRenderer(canvasRef.current)
     engineRef.current.setTool(tool)
+    setZoom(100)
   }, [])
 
   useEffect(() => {
     engineRef.current?.setTool(tool)
   }, [tool])
+  const zoomIn = () => {
+    engineRef.current?.zoomIn();
+    setZoom(Math.round((engineRef.current?.getZoom() ?? 1) * 100));
+  };
 
+  const zoomOut = () => {
+    engineRef.current?.zoomOut();
+    setZoom(Math.round((engineRef.current?.getZoom() ?? 1) * 100));
+  };
   return (
     <div className="fixed inset-0 bg-[#0f0f0f] overflow-hidden">
 
@@ -50,10 +59,24 @@ export default function CanvasPage() {
         </button>
       </div>
 
-      <div className="fixed bottom-4 left-4 flex items-center gap-1 rounded-lg bg-[#1c1c1c] px-2 py-1 border border-[#2a2a2a]">
-        <button className="px-2 text-gray-300">−</button>
-        <span className="text-xs text-gray-300">100%</span>
-        <button className="px-2 text-gray-300">+</button>
+      <div className="absolute bottom-6 left-6 flex items-center gap-2 bg-[#2a2b2f] rounded-xl px-3 py-2 shadow-lg">
+        <button
+          onClick={zoomOut}
+          className="text-white text-xl px-2 hover:bg-[#3a3b40] rounded"
+        >
+          −
+        </button>
+
+        <span className="text-white text-sm w-14 text-center">
+          {zoom}%
+        </span>
+
+        <button
+          onClick={zoomIn}
+          className="text-white text-xl px-2 hover:bg-[#3a3b40] rounded"
+        >
+          +
+        </button>
       </div>
 
       <div className="fixed bottom-4 right-4 flex items-center gap-2">
